@@ -1,6 +1,34 @@
+/**
+ * @fileoverview Image File Selector Component for Cookie Cutter Monster
+ * 
+ * This component provides a user-friendly file upload interface for selecting images
+ * to convert into cookie cutter shapes. It handles image loading, validation, and
+ * emits events with image data for downstream processing.
+ * 
+ * Features:
+ * - Drag-and-drop style upload area with visual feedback
+ * - File type validation (images only)
+ * - Automatic image dimension detection
+ * - Clean filename extraction for STL export
+ * - Event-driven architecture for loose coupling
+ * 
+ * @author Cookie Cutter Monster Team
+ * @version 1.0.0
+ * @since 2020-08-01
+ */
+
 import { LitElement, html, css } from 'lit-element';
 import { HTMLInputEvent } from "../types"
 
+/**
+ * Image file selector component with upload interface and validation
+ * 
+ * This LitElement component creates an intuitive file upload experience with:
+ * - Visual upload area with hover effects
+ * - Hidden file input for clean UI
+ * - Automatic image processing and validation
+ * - Custom event emission for parent components
+ */
 class ClipartSelector extends LitElement {
   static styles = css`
     container {
@@ -53,6 +81,23 @@ class ClipartSelector extends LitElement {
     }
   `;
 
+  /**
+   * Handles file input changes when user selects an image file
+   * 
+   * This method processes the selected file by:
+   * 1. Validating that a file was actually selected
+   * 2. Creating an Image object and blob URL for the file
+   * 3. Extracting the filename without extension for STL naming
+   * 4. Waiting for image load to get dimensions
+   * 5. Dispatching a custom event with all image data
+   * 
+   * The image dimensions are only available after the image loads,
+   * so the event dispatch is handled in the onload callback.
+   * 
+   * @param {HTMLInputEvent} e - File input change event
+   * @throws {Error} If no file was selected or target is null
+   * @fires image-changed - Custom event with image data for processing
+   */
   handleImageChange(e?: HTMLInputEvent) {
     if (!e || !e.target || !e.target.files) {
       throw Error("image change target is null")
@@ -82,6 +127,15 @@ class ClipartSelector extends LitElement {
     };
   }
 
+  /**
+   * Programmatically triggers the hidden file input when upload area is clicked
+   * 
+   * This method provides a better user experience by making the entire upload
+   * area clickable, rather than requiring users to click the small file input.
+   * It finds the hidden file input in the shadow DOM and simulates a click.
+   * 
+   * @returns {void}
+   */
   handleBtnClick() {
     if (!this.shadowRoot) return;
 

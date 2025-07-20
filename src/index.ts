@@ -1,3 +1,15 @@
+/**
+ * @fileoverview Main application entry point for Cookie Cutter Monster
+ * 
+ * This file contains the root application component that orchestrates the cookie cutter
+ * generation process. It handles OpenCV.js loading, user input events, and coordinates
+ * between the UI components and image processing services.
+ * 
+ * @author Cookie Cutter Monster Team
+ * @version 1.0.0
+ * @since 2020-08-01
+ */
+
 import "./registerComponents";
 import loadCV from "./scriptLoader";
 
@@ -7,25 +19,43 @@ import CookieState from "./services/cookieState";
 import { CookieState_t } from "./types";
 import processImage from "./services/imageProcessing";
 
+/**
+ * Interface for input change events that carry cookie cutter configuration data
+ */
 interface InputChangedEvent extends Event {
     detail: CookieState_t
 }
 
+/**
+ * Main application component for Cookie Cutter Monster
+ * 
+ * This LitElement component serves as the root of the application, managing the lifecycle
+ * of OpenCV.js loading, handling user interactions, and coordinating the image processing
+ * workflow to generate 3D cookie cutter models.
+ */
 class CookieCutterApp extends LitElement {
+    
+    /** OpenCV.js instance, loaded asynchronously */
+    cv = null;
+
     /**
-     * createRenderRoot removes the shadow dom for this 
-     * element.  Which allows you to querySelect by 
-     * using `document.querySelctor(<someQuery>)`
+     * Removes the shadow DOM for this element to allow direct DOM queries
      * 
-     * We are doing this because the opencv lib is using 
-     * document query selectors
+     * This is necessary because OpenCV.js uses document.querySelector() calls
+     * that need access to the main document DOM rather than shadow DOM.
+     * 
+     * @returns {HTMLElement} The component itself (no shadow root)
      */
     createRenderRoot() {
         return this;
     }
 
-    /* let's load in opencv so we can access it in this module */
-    cv = null;
+    /**
+     * Callback function for when OpenCV.js library is successfully loaded
+     * 
+     * @param {any} cv - The OpenCV.js module instance
+     * @throws {Error} If the OpenCV library couldn't be loaded
+     */
     getCV(cv: any) {
         if (!cv) {
             throw Error("couldn't load the opencv library")
@@ -35,10 +65,23 @@ class CookieCutterApp extends LitElement {
         this.requestUpdate();
     }
 
+    /**
+     * LitElement lifecycle method called after first render
+     * Initiates the OpenCV.js loading process
+     */
     firstUpdated() {
         loadCV(this.getCV.bind(this))
     }
 
+    /**
+     * Handles input changes from UI components and triggers image processing
+     * 
+     * This method is called whenever the user uploads a new image or changes
+     * cookie cutter parameters. It updates the global state and initiates
+     * the image processing pipeline.
+     * 
+     * @param {InputChangedEvent} event - Event containing updated cookie state
+     */
     handleInputChange(event: InputChangedEvent) {
         CookieState.update(event.detail);
 

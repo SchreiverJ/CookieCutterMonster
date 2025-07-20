@@ -1,6 +1,28 @@
+/**
+ * @fileoverview Cookie Cutter Configuration Component for Cookie Cutter Monster
+ * 
+ * This component provides a comprehensive settings interface for configuring
+ * cookie cutter generation parameters. Users can adjust physical properties
+ * like wall thickness and depth, as well as output quality settings.
+ * 
+ * Features:
+ * - Wall thickness selection for different 3D printing capabilities
+ * - Cutter depth configuration for various dough thicknesses
+ * - Model quality settings balancing file size vs. detail
+ * - Responsive grid layout for mobile devices
+ * - Real-time parameter updates via custom events
+ * 
+ * @author Cookie Cutter Monster Team
+ * @version 1.0.0
+ * @since 2020-08-01
+ */
+
 import { CookieState_t, HTMLInputEvent } from "../types";
 import { LitElement, html, css } from "lit-element";
 
+/**
+ * Enumeration of different setting change types for type-safe event handling
+ */
 enum ChangeType {
   THICKNESS,
   DEPTH,
@@ -9,6 +31,14 @@ enum ChangeType {
   HAS_ROUND_EDGES
 }
 
+/**
+ * Cookie cutter configuration component with settings for physical and quality parameters
+ * 
+ * This component manages user input for cookie cutter generation settings:
+ * - Physical dimensions (thickness, depth)
+ * - Quality/tolerance settings for 3D printing optimization
+ * - Event-driven updates to maintain loose coupling with parent components
+ */
 class CookieInputs extends LitElement {
   static styles = css`
     container {
@@ -54,6 +84,17 @@ class CookieInputs extends LitElement {
       }
     }
   `;
+
+  /**
+   * Dispatches configuration changes to parent components via custom events
+   * 
+   * This method creates a standardized event for communicating setting changes
+   * up the component tree. It maintains loose coupling by using the event system
+   * rather than direct parent references.
+   * 
+   * @param {CookieState_t} eventDetail - Partial state object containing changed settings
+   * @fires cookie-input-changed - Custom event with configuration updates
+   */
   eventToParent(eventDetail: CookieState_t) {
     const event = new CustomEvent("cookie-input-changed", {
       detail: eventDetail
@@ -62,6 +103,21 @@ class CookieInputs extends LitElement {
     this.dispatchEvent(event)
   }
 
+  /**
+   * Handles user input changes and updates the appropriate cookie cutter setting
+   * 
+   * This method processes different types of setting changes using a switch statement
+   * based on the ChangeType enum. It:
+   * 1. Validates the input event has a valid target
+   * 2. Creates a partial state update object
+   * 3. Updates the appropriate property based on change type
+   * 4. Converts values to correct types (Number for dimensions, Boolean for flags)
+   * 5. Dispatches the update to parent components
+   * 
+   * @param {HTMLInputEvent} e - Input change event from form controls
+   * @param {ChangeType} changeType - Type of setting being changed (thickness, depth, etc.)
+   * @throws {Error} If the input event or target is invalid
+   */
   handleChange(e: HTMLInputEvent, changeType: ChangeType) {
     if (!e || !e.target) {
       throw Error("error with thickness input")

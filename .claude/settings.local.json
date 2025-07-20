@@ -4,7 +4,9 @@
       "Bash(npm install)",
       "Bash(npm run build:static:*)",
       "Bash(mkdir:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm install:*)"
     ],
     "deny": []
   }

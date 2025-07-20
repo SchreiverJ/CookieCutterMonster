@@ -1,12 +1,46 @@
+/**
+ * @fileoverview Image Processing Service for Cookie Cutter Monster
+ * 
+ * This service handles the core image processing workflow using OpenCV.js for computer vision
+ * operations and Three.js for 3D model generation. It processes user-uploaded images to detect
+ * contours, generates editable boundaries, and creates 3D printable STL files for cookie cutters.
+ * 
+ * Key Features:
+ * - Image preprocessing with padding and adaptive thresholding
+ * - Contour detection and selection for cookie cutter shapes
+ * - Interactive contour picking via canvas clicks
+ * - 3D extrusion of shapes with configurable parameters
+ * - STL file export for 3D printing
+ * - Real-time 3D preview with orbital controls
+ * 
+ * @author Cookie Cutter Monster Team
+ * @version 1.0.0
+ * @since 2020-08-01
+ */
+
 //@ts-nocheck
 import { MAX_DIM } from "../constants";
 import { CookieState_t } from "../types";
 import cookieState from "./cookieState";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 
-
+/**
+ * Main image processing function that orchestrates the complete workflow
+ * 
+ * This function handles the entire pipeline from image upload to 3D model generation:
+ * 1. Sets up Three.js scene, camera, and renderer
+ * 2. Processes the input image with OpenCV.js
+ * 3. Detects and displays contours for user selection
+ * 4. Generates initial 3D model from the largest detected contour
+ * 5. Sets up event handlers for interactive contour selection and STL export
+ * 
+ * @param {any} cv - The OpenCV.js module instance
+ * @param {Element | null} imgElement - The HTML image element containing the source image
+ * @param {Element | null} canvasElement - The canvas element for displaying processed results
+ * @param {string} saveFilename - Base filename for STL export (without extension)
+ */
 export default function processImage(
     cv: any,
     imgElement: Element | null,
@@ -76,6 +110,20 @@ export default function processImage(
 
     onImageLoad();
 
+    /**
+     * Processes the loaded image using OpenCV.js computer vision operations
+     * 
+     * This function performs the core image processing workflow:
+     * 1. Adds padding to prevent edge artifacts
+     * 2. Converts to grayscale and applies adaptive thresholding
+     * 3. Finds contours using OpenCV's findContours algorithm
+     * 4. Filters contours by area to exclude noise and boundary
+     * 5. Draws contours on canvas for visualization
+     * 6. Generates 3D model from the largest valid contour
+     * 
+     * The function uses adaptive thresholding to handle varying lighting conditions
+     * and creates multiple contour maps for interactive selection.
+     */
     function onImageLoad() {
 
         console.log(imgElement)
@@ -188,9 +236,21 @@ export default function processImage(
         animate();
 
     }
+    
     /**
-     * Generate Cookie Cutter
-     * @param pointsArray
+     * Generates a 3D cookie cutter model from a contour and exports as STL
+     * 
+     * This function creates a complete 3D printable cookie cutter by:
+     * 1. Reading user configuration (depth, thickness, tolerance, etc.)
+     * 2. Creating inner and outer shapes with specified wall thickness
+     * 3. Extruding shapes to create the cutting edge and handle
+     * 4. Optionally applying bevels for sharper cutting edges
+     * 5. Merging geometries into a single mesh
+     * 6. Adding lighting and rendering the 3D preview
+     * 
+     * The generated model includes both the cutting edge and a handle for easy use.
+     * 
+     * @param {any} cnt - OpenCV contour object containing the shape boundary points
      */
     function generateSTL(cnt: any) {
         const height = Number(cookieState.get().depth);
@@ -259,13 +319,12 @@ export default function processImage(
 
         var geom = new THREE.Geometry();
 
-        //Extrude the Cutter
+        //Extrude the Cutter (using compatible API)
         if (bevelCutter) {
             var cgeometry = new THREE.Geometry().fromBufferGeometry(new THREE.ExtrudeBufferGeometry(outShape, extrudeSettings));
             cgeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, height / 2));
             var cmesh = new THREE.Mesh(cgeometry, material);
             cmesh.updateMatrix()
-
 
             var c2geometry = new THREE.Geometry().fromBufferGeometry(new THREE.ExtrudeBufferGeometry(outShape2, extrudeSettings2));
             var c2mesh = new THREE.Mesh(c2geometry, material);
@@ -281,7 +340,6 @@ export default function processImage(
 
             geom.mergeMesh(c2mesh);
         }
-
 
         //Extrude the Handle
         var hgeometry = new THREE.Geometry().fromBufferGeometry(new THREE.ExtrudeBufferGeometry(handleoutShape, handleExtrudeSettings));
@@ -308,7 +366,26 @@ export default function processImage(
         controls.update();
     }
 
-
+    /**
+     * Creates a scaled outline shape with inner and outer boundaries for 3D extrusion
+     * 
+     * This function generates the cookie cutter cross-section by:
+     * 1. Calculating optimal scaling to fit within desired dimensions
+     * 2. Drawing the contour with specified line thickness on a high-resolution canvas
+     * 3. Using contour detection to find inner and outer boundaries
+     * 4. Converting to Three.js Vector2 points for geometry creation
+     * 5. Creating a THREE.Shape with holes for proper extrusion
+     * 
+     * The approach uses a "draw and detect" method to ensure clean boundaries
+     * without overlapping artifacts that can occur with mathematical offset approaches.
+     * 
+     * @param {any} cnt - OpenCV contour object with shape boundary points
+     * @param {number} width - Wall thickness in millimeters
+     * @param {number} maxBoundaryOffetWidth - Maximum boundary offset width
+     * @param {number} maxDesiredOut - Maximum desired output dimension
+     * @param {any} tol - Tolerance for point simplification to reduce geometry complexity
+     * @returns {THREE.Shape} Three.js shape object ready for extrusion
+     */
     function getScaledOutlineShape(
         cnt: any,
         width: number,
@@ -378,8 +455,24 @@ export default function processImage(
 
     }
 
-
-    // Create a ThreeJS Vector from a OpenCV Contour
+    /**
+     * Converts an OpenCV contour to an array of Three.js Vector2 points
+     * 
+     * This function optimizes the contour for 3D rendering by:
+     * 1. Extracting x,y coordinates from OpenCV contour data
+     * 2. Applying scaling factor for proper sizing
+     * 3. Filtering points based on tolerance to reduce complexity
+     * 4. Converting to Three.js Vector2 format for geometry creation
+     * 
+     * The tolerance filtering removes redundant points that are too close together,
+     * which reduces file size and improves 3D printing performance without
+     * significantly affecting shape accuracy.
+     * 
+     * @param {any} cnt - OpenCV contour object containing point data
+     * @param {number} scaleF - Scaling factor to apply to coordinates
+     * @param {number} tolerace - Minimum distance between points (filters redundant points)
+     * @returns {THREE.Vector2[]} Array of Three.js Vector2 points ready for shape creation
+     */
     function getThreeVector(cnt: any, scaleF: any, tolerace: any) {
         const cPoints = []
         const scale = scaleF
@@ -402,7 +495,17 @@ export default function processImage(
         return cPoints;
     }
 
-
+    /**
+     * Animation loop for Three.js scene rendering
+     * 
+     * This function continuously renders the 3D scene and:
+     * 1. Updates orbital controls for smooth camera movement
+     * 2. Renders the scene with current camera position
+     * 3. Calls camera debug function if enabled
+     * 4. Requests the next animation frame for smooth 60fps rendering
+     * 
+     * The animation loop is essential for interactive 3D preview functionality.
+     */
     function animate() {
 
         requestAnimationFrame(animate);
@@ -416,9 +519,17 @@ export default function processImage(
 
     }
 
-
     const cameraDebugElem = document.querySelector("#cameraDebug");
 
+    /**
+     * Debug function for camera position monitoring (currently disabled)
+     * 
+     * This function was used during development to track camera position and rotation
+     * for debugging the 3D scene setup. Currently commented out but preserved for
+     * future debugging needs.
+     * 
+     * When enabled, it updates the cookie state with current camera coordinates.
+     */
     function camera_debug() {
         // if (!cameraDebugElem) return;
 
@@ -434,8 +545,22 @@ export default function processImage(
         // });
     }
 
-
-
+    /**
+     * Handles user clicks on the canvas to select different contours interactively
+     * 
+     * This function enables users to click on the processed image canvas to select
+     * different detected contours for their cookie cutter. The workflow:
+     * 1. Maps click coordinates to contour map pixel values
+     * 2. Identifies which contour was clicked based on color mapping
+     * 3. Reprocesses the image highlighting the selected contour
+     * 4. Regenerates the 3D model using the newly selected contour
+     * 5. Updates the display with the new contour and 3D preview
+     * 
+     * This allows users to choose from multiple detected shapes in complex images.
+     * 
+     * @param {number} x - X coordinate of the click on the canvas
+     * @param {number} y - Y coordinate of the click on the canvas
+     */
     function updateContourSelection(x, y) {
 
         //Figure out if we clicked close enough to a countor
@@ -491,9 +616,27 @@ export default function processImage(
         };
     };
 
-    //https://stackoverflow.com/questions/609530/download-textarea-contents-as-a-file-using-only-javascript-no-server-side
+    /**
+     * Exports the current 3D model as an STL file for download
+     * 
+     * This function handles the client-side file export process:
+     * 1. Sanitizes the filename to prevent security issues
+     * 2. Regenerates the STL geometry from the current contour
+     * 3. Uses Three.js STLExporter to convert geometry to STL format
+     * 4. Creates a downloadable blob and triggers browser download
+     * 5. Handles cross-browser compatibility for file downloads
+     * 
+     * The STL format is the standard for 3D printing, containing triangulated
+     * mesh data that slicing software can process for printer instructions.
+     * 
+     * Security: Filename is sanitized to prevent path traversal and XSS attacks.
+     * 
+     * @see https://stackoverflow.com/questions/609530/download-textarea-contents-as-a-file-using-only-javascript-no-server-side
+     */
     function saveTextAsFile() {
-        var fileNameToSaveAs = saveFilename + ".stl"
+        // Sanitize filename to prevent any potential issues
+        var sanitizedFilename = saveFilename.replace(/[^a-zA-Z0-9_-]/g, '_');
+        var fileNameToSaveAs = sanitizedFilename + ".stl"
         console.log(fileNameToSaveAs)
         generateSTL(lastCnt)
         var textToWrite = exporter.parse(scene);
@@ -501,7 +644,7 @@ export default function processImage(
         var textFileAsBlob = new Blob([textToWrite], { type: 'text/plain' });
         var downloadLink = document.createElement("a");
         downloadLink.download = fileNameToSaveAs;
-        downloadLink.innerHTML = "Download File";
+        downloadLink.textContent = "Download File";
         if (window.webkitURL != null) {
             // Chrome allows the link to be clicked
             // without actually adding it to the DOM.
