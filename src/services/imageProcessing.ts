@@ -61,8 +61,12 @@ export default function processImage(
     camera.rotation.x = 0;
     camera.rotation.y = 0;
     camera.lookAt(new THREE.Vector3(50, 0, 50)); // Set look at coordinate like this
-    panel3d.appendChild(renderer.domElement);
-
+    
+    // Clear any existing renderer canvases before adding new one
+    while (panel3d.firstChild) {
+        panel3d.removeChild(panel3d.firstChild);
+    }
+    
     panel3d.appendChild(renderer.domElement);
 
     
