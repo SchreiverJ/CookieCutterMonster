@@ -21,89 +21,272 @@
 	<meta name="author" content="SchreiverJ">
 
 
-	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
 
 	<style>
-		body {
-			background: aliceblue;
-			margin: 0;
-		}
-
+		/* Modern CSS Custom Properties */
 		:root {
-			--border-size: 0.125rem;
-			--duration: 250ms;
-			--ease: cubic-bezier(0.215, 0.61, 0.355, 1);
-			--font-family: monospace;
-			--color-primary: white;
-			--color-secondary: black;
-			--shadow: rgba(0, 0, 0, 0.1);
-			--space: 1rem;
+			/* Colors - Cookie & Baking Theme */
+			--primary-brand: #8B4513;           /* Warm brown like cookie dough */
+			--primary-light: #CD853F;           /* Sandy brown */
+			--primary-dark: #5D4037;            /* Dark brown */
+			--accent: #FF6B35;                  /* Warm orange like baked cookies */
+			--accent-light: #FFB74D;            /* Light orange */
+			
+			/* Neutrals */
+			--background-primary: #FFF8E1;      /* Cream like flour */
+			--background-secondary: #FFFFFF;    /* Pure white */
+			--surface: #F5F5F5;                 /* Light gray */
+			--text-primary: #2E2E2E;            /* Dark gray */
+			--text-secondary: #666666;          /* Medium gray */
+			--text-muted: #999999;              /* Light gray */
+			
+			/* Elevation & Effects */
+			--shadow-light: 0 2px 8px rgba(139, 69, 19, 0.08);
+			--shadow-medium: 0 4px 16px rgba(139, 69, 19, 0.12);
+			--shadow-heavy: 0 8px 32px rgba(139, 69, 19, 0.16);
+			
+			/* Spacing */
+			--space-xs: 0.5rem;
+			--space-sm: 1rem;
+			--space-md: 1.5rem;
+			--space-lg: 2rem;
+			--space-xl: 3rem;
+			--space-2xl: 4rem;
+			
+			/* Typography */
+			--font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			--font-family-display: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+			
+			/* Borders & Radius */
+			--border-radius: 12px;
+			--border-radius-lg: 16px;
+			--border: 1px solid #E0E0E0;
+			
+			/* Transitions */
+			--transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		/* Global Styles */
+		* {
+			box-sizing: border-box;
 		}
 
 		body {
-			background-color: aliceblue;
 			margin: 0;
+			padding: 0;
+			font-family: var(--font-family-primary);
+			background: linear-gradient(135deg, var(--background-primary) 0%, #FFFDE7 100%);
+			color: var(--text-primary);
+			line-height: 1.6;
+			min-height: 100vh;
 		}
 
+		/* App Header */
+		mwc-top-app-bar {
+			--mdc-theme-primary: var(--primary-brand);
+			--mdc-theme-on-primary: white;
+			margin-bottom: var(--space-lg);
+		}
+
+		mwc-top-app-bar h2 {
+			font-family: var(--font-family-display);
+			font-weight: 600;
+			margin: 0;
+			display: flex;
+			align-items: center;
+			gap: var(--space-sm);
+		}
+
+		/* Main Layout */
 		grid-container {
 			display: grid;
-			grid-template-columns: .5fr auto;
-			align-content: center;
-			grid-gap: 6rem;
-			padding: 2rem;
+			grid-template-columns: 1fr 1fr;
+			gap: var(--space-2xl);
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: var(--space-lg);
 		}
 
-		canvas-container {
-			display: grid;
-		}
-
-		title-card {
-			display: grid;
-			align-content: center;
-			text-align: center;
-			grid-column-start: 1;
-			grid-column-end: 4;
-			width: 100vw;
-			background-color: lightslategray;
-		}
-
-		user-tip {
-			grid-column-start: 1;
-			grid-column-end: 4;
-		}
-
+		/* Input Panel */
 		input-container {
-			grid-column-start: 1;
-			display: grid;
-			align-content: center;
+			background: var(--background-secondary);
+			border-radius: var(--border-radius-lg);
+			padding: var(--space-xl);
+			box-shadow: var(--shadow-medium);
+			border: var(--border);
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-lg);
 		}
 
-		clipart-selector {
-			display: grid;
-			grid-column-start: 1;
+		input-container > p {
+			margin: 0 0 var(--space-md) 0;
+			color: var(--text-secondary);
+			font-size: 1.1rem;
+			text-align: center;
+			background: linear-gradient(135deg, var(--primary-light), var(--accent));
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			font-weight: 500;
 		}
 
-		.canvasContainer {
-			align-items: center;
+		/* Preview Panel */
+		canvas-container {
+			background: var(--background-secondary);
+			border-radius: var(--border-radius-lg);
+			padding: var(--space-xl);
+			box-shadow: var(--shadow-medium);
+			border: var(--border);
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-lg);
+			min-height: 600px;
 		}
 
-		download-btn-container {
-			display: grid;
-			align-content: center;
-		}
-
+		/* Canvas Styling */
 		canvas {
-			box-shadow: 2px 2px 39px -14px;
-		}
-
-		#imageSrc {
-			height: 1000px;
-			width: 1000px;
+			border-radius: var(--border-radius);
+			box-shadow: var(--shadow-light);
+			max-width: 100%;
+			height: auto;
 		}
 
 		#threeoutput {
-			min-width: 400px;
+			border-radius: var(--border-radius);
+			overflow: hidden;
+			background: #f8f9fa;
+			min-height: 400px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: var(--shadow-light);
+		}
+
+		/* Button Styling */
+		download-btn-container {
+			margin-top: var(--space-md);
+		}
+
+		mwc-button {
+			--mdc-theme-primary: var(--accent);
+			--mdc-theme-on-primary: white;
+			--mdc-button-horizontal-padding: var(--space-lg);
+			font-weight: 600;
+			height: 48px;
+			border-radius: var(--border-radius);
+		}
+
+		mwc-button[outlined] {
+			--mdc-theme-primary: var(--primary-brand);
+			border: 2px solid var(--primary-brand);
+			transition: var(--transition);
+		}
+
+		mwc-button[outlined]:hover {
+			background-color: var(--primary-brand);
+			color: white;
+		}
+
+		/* Image Preview */
+		#imageSrc {
+			max-width: 100%;
+			max-height: 300px;
+			object-fit: contain;
+			border-radius: var(--border-radius);
+			box-shadow: var(--shadow-light);
+		}
+
+		/* Loading States */
+		.loading {
+			position: relative;
+			opacity: 0.7;
+		}
+
+		.loading::after {
+			content: '';
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 20px;
+			height: 20px;
+			margin: -10px 0 0 -10px;
+			border: 2px solid var(--primary-light);
+			border-top: 2px solid var(--primary-brand);
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		/* Responsive Design */
+		@media (max-width: 1024px) {
+			grid-container {
+				grid-template-columns: 1fr;
+				gap: var(--space-lg);
+			}
+			
+			input-container,
+			canvas-container {
+				padding: var(--space-lg);
+			}
+		}
+
+		@media (max-width: 768px) {
+			grid-container {
+				padding: var(--space-md);
+				gap: var(--space-md);
+			}
+			
+			input-container,
+			canvas-container {
+				padding: var(--space-md);
+			}
+			
+			#threeoutput {
+				min-height: 300px;
+			}
+		}
+
+		/* Custom Scrollbar */
+		::-webkit-scrollbar {
+			width: 8px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: var(--surface);
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: var(--primary-light);
+			border-radius: 4px;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background: var(--primary-brand);
+		}
+
+		/* Animations */
+		@keyframes fadeIn {
+			from { opacity: 0; transform: translateY(20px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		input-container,
+		canvas-container {
+			animation: fadeIn 0.6s ease-out;
+		}
+
+		/* Focus States */
+		mwc-button:focus,
+		mwc-select:focus {
+			outline: 2px solid var(--accent);
+			outline-offset: 2px;
 		}
 	</style>
 </head>

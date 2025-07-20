@@ -66,29 +66,46 @@ class CookieCutterApp extends LitElement {
         return html`
         <camera-debug id="cameraDebug"></camera-debug>
         <mwc-top-app-bar>
-            <h2 slot="title">Easy Cookie Cutters</h2>
+            <h2 slot="title">🍪 Cookie Cutter Monster</h2>
             </mwc-top-app-bar>
             
         <grid-container>
-            <input-container>				
-                <p> Try uploading a cartoon or clipart with a uniform background to easy create your own 3d modeled cookie cutter </p>
+            <input-container>
+                <h3 style="margin: 0 0 1rem 0; color: var(--primary-brand); font-family: var(--font-family-display);">Create Your Cookie Cutter</h3>
+                <p>Upload an image with a clear subject and uniform background to create your own custom 3D printable cookie cutter</p>
                 <clipart-selector @image-changed="${this.handleInputChange}">
                     <img name="image" id="imageSrc" />
                 </clipart-selector>
                 <cookie-size @cookie-input-changed=${this.handleInputChange}></cookie-size>
                 <cookie-inputs @cookie-input-changed=${this.handleInputChange} id="cookie-inputs"></cookie-inputs>
                 <download-btn-container>
-                    <mwc-button outlined type="submit" id="exportASCII" class="btn btn-primary">
-                        Download STL
+                    <mwc-button raised type="submit" id="exportASCII" class="btn btn-primary">
+                        📥 Download STL File
                     </mwc-button>
+                    <p style="text-align: center; margin: 0.5rem 0 0 0; color: var(--text-muted); font-size: 0.9rem;">
+                        Ready for 3D printing with PLA, PETG, or ABS
+                    </p>
                 </download-btn-container>
             </input-container>
 
             <canvas-container>
-                <canvas id="canvasOutput"></canvas>
-
-                <div id="threeoutput" border-width="thick" border-color="coral">
-                    <!-- placeholder for threejs output -->
+                <h3 style="margin: 0 0 1rem 0; color: var(--primary-brand); font-family: var(--font-family-display);">🔍 Preview & Results</h3>
+                
+                <div style="display: grid; gap: 1.5rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 1rem;">Edge Detection</h4>
+                        <canvas id="canvasOutput"></canvas>
+                    </div>
+                    
+                    <div>
+                        <h4 style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 1rem;">3D Model Preview</h4>
+                        <div id="threeoutput">
+                            <div style="text-align: center; color: var(--text-muted);">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">🍪</div>
+                                <p>Your 3D cookie cutter will appear here</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </canvas-container>
 
