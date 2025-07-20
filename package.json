@@ -4,8 +4,13 @@
   "description": "",
   "scripts": {
     "predev": "mkdir -p build/lib && cp cookie.html build/ && cp js/opencv.js build/lib/",
-    "dev": "webpack --config webpack.config.cjs --watch & cd build && es-dev-server --app-index cookie.html --node-resolve --watch --open",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider webpack --config webpack.config.cjs --watch & cd build && npx serve . -l 8000 --no-clipboard",
     "start": "npm run dev",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack --config webpack.config.cjs",
+    "build:static": "npm run prebuild:static && npm run build && npm run postbuild:static",
+    "prebuild:static": "rm -rf dist && mkdir -p dist/lib",
+    "postbuild:static": "cp build/* dist/ 2>/dev/null || true && cp build/lib/* dist/lib/ 2>/dev/null || true && cp -r build/components dist/ 2>/dev/null || true && cp -r build/services dist/ 2>/dev/null || true && cp cookie.html dist/index.html",
+    "serve:static": "cd dist && npx serve . -l 8000",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
